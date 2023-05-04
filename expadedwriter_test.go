@@ -14,7 +14,9 @@ func TestRender(t *testing.T) {
 	w.Append([]string{"1", "test@example.com"})
 	w.Append([]string{"2", "longlonglonglonglonglonglonglong@example.com"})
 	w.Append([]string{"3", "3@example.com"})
-	w.Render()
+	if err := w.Render(); err != nil {
+		t.Fatal(err)
+	}
 
 	expected := `--[ Data 1 ]----------------------------------------
 ID    | 1
@@ -39,7 +41,9 @@ func TestRender_WithoutFields(t *testing.T) {
 	w.Append([]string{"1", "test@example.com"})
 	w.Append([]string{"2", "longlonglonglonglonglonglonglong@example.com"})
 	w.Append([]string{"3", "3@example.com"})
-	w.Render()
+	if err := w.Render(); err != nil {
+		t.Fatal(err)
+	}
 
 	expected := `--[ Data 1 ]-----------------------------------
  | 1

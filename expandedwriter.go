@@ -59,7 +59,6 @@ func (ew *Expandedwriter) Render() error {
 		result += "\n"
 	}
 
-	ew.w.Write([]byte(result))
-
-	return nil
+	_, err := ew.w.Write([]byte(result))
+	return err
 }
