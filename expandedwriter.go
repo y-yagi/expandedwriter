@@ -20,18 +20,14 @@ func NewWriter(w io.Writer) *Expandedwriter {
 
 func (ew *Expandedwriter) SetFields(fields []string) {
 	for _, v := range fields {
-		if ew.fieldMaxLength < len(v) {
-			ew.fieldMaxLength = len(v)
-		}
+		ew.fieldMaxLength = ew.max(ew.fieldMaxLength, len(v))
 	}
 	ew.fields = fields
 }
 
 func (ew *Expandedwriter) Append(value []string) {
 	for _, v := range value {
-		if ew.valueMaxLength < len(v) {
-			ew.valueMaxLength = len(v)
-		}
+		ew.valueMaxLength = ew.max(ew.valueMaxLength, len(v))
 	}
 	ew.values = append(ew.values, value)
 }
@@ -61,4 +57,12 @@ func (ew *Expandedwriter) Render() error {
 
 	_, err := ew.w.Write([]byte(result))
 	return err
+}
+
+func (ew *Expandedwriter) max(x, y int) int {
+	if x > y {
+		return x
+	}
+
+	return y
 }
