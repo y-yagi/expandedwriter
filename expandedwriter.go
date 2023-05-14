@@ -12,10 +12,11 @@ type Expandedwriter struct {
 	values         [][]string
 	valueMaxLength int
 	fieldMaxLength int
+	headerName     string
 }
 
 func NewWriter(w io.Writer) *Expandedwriter {
-	return &Expandedwriter{w: w}
+	return &Expandedwriter{w: w, headerName: "Data"}
 }
 
 func (ew *Expandedwriter) SetFields(fields []string) {
@@ -23,6 +24,10 @@ func (ew *Expandedwriter) SetFields(fields []string) {
 		ew.fieldMaxLength = ew.max(ew.fieldMaxLength, len(v))
 	}
 	ew.fields = fields
+}
+
+func (ew *Expandedwriter) SetHeaderName(headername string) {
+	ew.headerName = headername
 }
 
 func (ew *Expandedwriter) Append(value []string) {
@@ -37,7 +42,7 @@ func (ew *Expandedwriter) Render() error {
 	delimiterSizeForFieldAndValue := 3
 
 	for i, value := range ew.values {
-		header := fmt.Sprintf("--[ Data %d ]", i+1)
+		header := fmt.Sprintf("--[ "+ew.headerName+" %d ]", i+1)
 		if len(header) < ew.valueMaxLength+ew.fieldMaxLength+delimiterSizeForFieldAndValue {
 			header += strings.Repeat("-", ew.valueMaxLength+ew.fieldMaxLength+delimiterSizeForFieldAndValue-len(header))
 		}
