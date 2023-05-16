@@ -3,7 +3,10 @@ package expandedwriter
 import (
 	"fmt"
 	"io"
+	"os"
 	"strings"
+
+	"golang.org/x/term"
 )
 
 type Expandedwriter struct {
@@ -13,10 +16,18 @@ type Expandedwriter struct {
 	valueMaxLength int
 	fieldMaxLength int
 	headerName     string
+	terminalWidth  int
 }
 
 func NewWriter(w io.Writer) *Expandedwriter {
-	return &Expandedwriter{w: w, headerName: "Data"}
+	writer := &Expandedwriter{w: w, headerName: "Data", terminalWidth: -1}
+	if w, ok := w.(*os.File); ok {
+		if width, _, err := term.GetSize(int(w.Fd())); err == nil {
+			writer.terminalWidth = width
+		}
+	}
+
+	return writer
 }
 
 func (ew *Expandedwriter) SetFields(fields []string) {
@@ -41,10 +52,15 @@ func (ew *Expandedwriter) Render() error {
 	result := ""
 	delimiterSizeForFieldAndValue := 3
 
+	headerSize := ew.valueMaxLength + ew.fieldMaxLength + delimiterSizeForFieldAndValue
+	if ew.terminalWidth != -1 && headerSize > ew.terminalWidth {
+		headerSize = ew.terminalWidth
+	}
+
 	for i, value := range ew.values {
 		header := fmt.Sprintf("--[ "+ew.headerName+" %d ]", i+1)
-		if len(header) < ew.valueMaxLength+ew.fieldMaxLength+delimiterSizeForFieldAndValue {
-			header += strings.Repeat("-", ew.valueMaxLength+ew.fieldMaxLength+delimiterSizeForFieldAndValue-len(header))
+		if len(header) < headerSize {
+			header += strings.Repeat("-", headerSize-len(header))
 		}
 
 		result += header
