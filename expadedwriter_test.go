@@ -2,6 +2,8 @@ package expandedwriter_test
 
 import (
 	"bytes"
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/y-yagi/expandedwriter"
@@ -88,5 +90,17 @@ email | 3@example.com
 	got := outbuf.String()
 	if got != expected {
 		t.Fatalf("Exepectd \n\n%s\nbut got\n\n%s\n", expected, got)
+	}
+}
+
+func TestRender_WithTerminal(t *testing.T) {
+	w := expandedwriter.NewWriter(os.Stdout)
+	w.SetHeaderName("Row")
+	w.SetFields([]string{"ID", "email"})
+	w.Append([]string{"1", "test@example.com"})
+	w.Append([]string{"2", strings.Repeat("long", 50) + "@example.com"})
+	w.Append([]string{"3", "3@example.com"})
+	if err := w.Render(); err != nil {
+		t.Fatal(err)
 	}
 }
